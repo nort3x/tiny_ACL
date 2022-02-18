@@ -401,11 +401,45 @@ fi
 done
 
 
-echo "##########Manual Can Access##########"
 
-./auth AddUser Tester Tester
-./auth SetDomain Tester Domain
-./auth SetType Object Type
-./auth AddAccess Operation Domain Type
-./auth CanAccess Operation Tester Object 
-# maybe later i patch it up
+
+echo "##########CanAccess for Object and Domain##########"
+
+for i in {1..100}
+do
+echo "CanAccess  operation${i} user$i object$i"
+result=$(./auth CanAccess operation${i} user$i object$i)
+if [[ "$result" != "Success" ]]
+then
+echo "test failed "
+exit 0
+fi
+done
+
+
+echo "##########CanAccess (bad user) for Object and Domain##########"
+
+for i in {1..100}
+do
+echo "CanAccess  operation${i} user1 object2"
+result=$(./auth CanAccess  operation${i} user1 object2)
+if [[ "$result" != "Error: access denied" ]]
+then
+echo "test failed "
+exit 0
+fi
+done
+
+
+
+echo "##########CanAccess Cross Domin Access##########"
+
+./auth SetType object1 lux
+./auth AddAccess operation1 userdomain2 lux 
+ result=$(./auth CanAccess operation1  user2 object1)
+if [[ "$result" != "Success" ]]
+then
+echo "test failed "
+exit 0
+fi
+
